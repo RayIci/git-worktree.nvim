@@ -1,0 +1,146 @@
+*git-worktree.txt*    Git worktrees where switching replaces the workspace
+
+                                                       *git-worktree*
+
+Create, switch and delete git worktrees. A switch saves the outgoing
+workspace, replaces buffers, tabs and layout, changes the working directory
+and restores the destination's saved workspace. Other plugins take part
+through optional integrations; your own state through participants.
+
+==============================================================================
+CONTENTS                                          *git-worktree-contents*
+
+    1. Requirements ...................... |git-worktree-requirements|
+    2. Setup ............................. |git-worktree-setup|
+    3. Actions ........................... |git-worktree-actions|
+    4. Integrations ...................... |git-worktree-integrations|
+    5. Participants ...................... |git-worktree-participants|
+    6. Events ............................ |git-worktree-events|
+    7. Lua API ........................... |git-worktree-api|
+
+==============================================================================
+1. REQUIREMENTS                               *git-worktree-requirements*
+
+- Neovim 0.12 or newer, and `git` on `PATH`.
+- A non-bare main checkout. Bare-only repositories are not supported.
+- No plugin is required; see |git-worktree-integrations|.
+
+==============================================================================
+2. SETUP                                             *git-worktree-setup*
+
+>lua
+    require("git-worktree").setup({
+      integrations = { "auto_session", "neogit", "dap",
+                       "scope", "bufferline", "neotree" },
+    })
+<
+Options:
+
+`integrations`   (default `{}`)
+    Integrations to enable, in order. One whose plugin is not installed is
+    skipped with a warning.
+
+`destination`    (default `nil`)
+    `fun(ctx, branch): string` returning the default destination of a new
+    worktree. Without it: `<main-checkout>.worktrees/<branch>`.
+
+`setup()` maps no keys.
+
+==============================================================================
+3. ACTIONS                                         *git-worktree-actions*
+
+                                                   *git-worktree.create()*
+create()   Pick a local branch, a remote branch or "Create new branch...",
+           confirm or edit the destination, create the worktree and switch
+           to it. Relative destinations resolve against the main checkout;
+           `~/` expands; an existing path is refused. New branches start at
+           the invoking checkout's HEAD; a remote branch is tracked, or its
+           existing local counterpart reused unchanged. Nothing is fetched.
+
+                                                   *git-worktree.switch()*
+switch()   Pick a registered checkout and switch the workspace to it.
+           Unsaved buffers must be saved ("Save all and switch") or the
+           switch is cancelled (the default); unnamed or unwritable ones,
+           live terminal jobs and (with `dap`) debug sessions block it.
+           If the destination's session fails to restore, the source is
+           restored; if that fails too, automatic writes stay off and the
+           error names the current directory and the source session.
+
+                                                   *git-worktree.delete()*
+delete()   Pick a checkout and remove it after confirmation. Refuses the
+           main and the active checkout, locked worktrees, and modified,
+           staged, untracked or ignored content. Never forces and never
+           deletes the branch.
+
+                                                     *git-worktree.menu()*
+menu()     One picker offering the three actions above.
+
+Only one action runs at a time. Pickers use |vim.ui.select| and
+|vim.ui.input|.
+
+==============================================================================
+4. INTEGRATIONS                               *git-worktree-integrations*
+
+`auto_session`  Session backend (rmagatti/auto-session). Saves the outgoing
+              session even with exit autosave off, leaving that preference
+              as it was, and restores the destination's, treating restore
+              errors as failures. Without a session backend, switches
+              restore participants only.
+`neogit`        Closes Neogit's status float before an action, refreshes
+              after a worktree is created or removed, and makes the active
+              checkout Neogit's repository.
+`dap`           Blocks switching during a debug session; clears breakpoints
+              with the old workspace.
+`scope`         Drops scope.nvim's per-tab buffer lists.
+`bufferline`    Drops bufferline's pins.
+`neotree`       Closes neo-tree and drops its per-tab source state.
+
+==============================================================================
+5. PARTICIPANTS                               *git-worktree-participants*
+
+                                               *git-worktree.register()*
+register({participant})
+    Add a participant to every switch, replacing one with the same `name`.
+    A participant is a table with a `name` and any of these hooks, called
+    in registration order:
+
+    `prepare()`       before an action reads the repository
+    `check()`         raise to refuse leaving the workspace
+    `pause()`         stop automatic writes and drop pending ones
+    `flush()`         save outgoing state now; raising aborts the switch
+                    before anything is torn down
+    `reset()`         before the old workspace's buffers are deleted
+    `cleanup()`       after they are deleted
+    `restore(info)`   `info.path` became the working directory
+                    (`info.checkout` is its top level)
+    `resume()`        automatic writes may start again (not called when
+                    recovery failed)
+    `changed(ctx)`    a worktree was created or removed
+
+unregister({name})                           *git-worktree.unregister()*
+
+==============================================================================
+6. EVENTS                                           *git-worktree-events*
+
+|User| autocommands, with |event-data|:
+
+    `GitWorktreeCreated`     `{ path }`
+    `GitWorktreeRemoved`     `{ path }`
+    `GitWorktreeSwitchPre`   `{ from, to }`
+    `GitWorktreeSwitched`    `{ from, path }`
+
+==============================================================================
+7. LUA API                                             *git-worktree-api*
+
+`discover(cwd?)`                        repository context
+`branches(ctx)`                         local and remote branches
+`destination(ctx, branch, override?)`   resolved, validated destination
+`create_checkout(ctx, choice, path)`    create a worktree
+`remove_checkout(ctx, path)`            remove a worktree
+`preflight()`                           the switch guards; false = cancelled
+`switch_to(ctx, path)`                  switch the workspace
+
+Neogit's `:Neogit worktree` popup is a git-only interface and does not save
+or switch workspaces.
+
+ vim:tw=78:ts=8:ft=help:norl:
