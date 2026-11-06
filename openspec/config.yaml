@@ -1,0 +1,47 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: false
+
+context: |
+  git-worktree.nvim: a Neovim plugin (Lua, Neovim >= 0.12) that creates, switches and
+  deletes git worktrees, where switching replaces the whole editor workspace.
+  Dependencies: Neovim and git only. Other plugins take part only through optional
+  integrations in lua/git-worktree/integrations/ (each a participant); hosts register
+  their own participants and wire keys themselves.
+  Behaviour contract: openspec/specs/worktree-workspaces/spec.md.
+  Code: lua/git-worktree/; user docs in README.md and doc/git-worktree.txt
+  (:help git-worktree). Keep both in step with behaviour.
+  Tests: headless, no framework: `make test` (core, no plugins) and
+  `make test-integration` (integrations against the plugins on 'packpath').
+  Also `make fmt-check` (stylua); modules carry LuaCATS annotations.
+
+# Project context (optional)
+# Add only constraints that should guide OpenSpec artifacts and workflows.
+# Include constraints an agent cannot infer by reading the code.
+# Keep general project documentation and discoverable codebase facts out.
+# Example:
+#   context: |
+#     Designs and tasks must cover Windows, macOS, and Linux
+#     Write all artifacts in Spanish
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
