@@ -240,7 +240,7 @@ Hosts SHALL be able to register named participants whose optional hooks the plug
 - **THEN** participants are not resumed
 
 ### Requirement: Optional integrations
-`setup()` SHALL accept a list of integrations to enable, each a participant shipped with the plugin for one other plugin: `auto_session` (session backend), `neogit`, `dap`, `scope`, `bufferline` and `neotree`. An integration whose plugin is not installed SHALL be skipped with one warning; an unknown name SHALL be reported.
+`setup()` SHALL accept a list of integrations to enable, each a participant shipped with the plugin for one other plugin: `auto_session` (session backend), `neogit`, `dap`, `scope`, `bufferline`, `neotree` and `snacks_explorer`. An integration whose plugin is not installed SHALL be skipped with one warning; an unknown name SHALL be reported.
 
 #### Scenario: Missing plugin
 - **WHEN** `setup()` enables `neotree` and neo-tree is not installed
@@ -257,6 +257,10 @@ Hosts SHALL be able to register named participants whose optional hooks the plug
 #### Scenario: Old workspace state cleared
 - **WHEN** the scope, bufferline, neotree and dap integrations are enabled and the user switches
 - **THEN** the old workspace's per-tab buffer lists, pins, explorer and breakpoints are gone in the destination
+
+#### Scenario: Snacks explorer closed and forgotten
+- **WHEN** the snacks_explorer integration is enabled, the snacks explorer is open with folders expanded, and the user switches
+- **THEN** the explorer is closed before the old workspace's buffers go, and no folder of the old workspace is still marked expanded
 
 ### Requirement: Events
 The plugin SHALL fire `User` autocommands `GitWorktreeCreated` and `GitWorktreeRemoved` with the checkout's path, `GitWorktreeSwitchPre` with the source and destination, and `GitWorktreeSwitched` with the source and the new path after a successful switch.
