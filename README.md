@@ -103,6 +103,7 @@ and never deletes the branch.
 | `scope` | tiagovla/scope.nvim | Drops the old workspace's per-tab buffer lists. |
 | `bufferline` | akinsho/bufferline.nvim | Drops the old workspace's pins. |
 | `neotree` | nvim-neo-tree/neo-tree.nvim | Closes the explorer and drops its per-tab state. |
+| `snacks_explorer` | folke/snacks.nvim | Closes the snacks explorer and forgets its expanded folders. |
 
 ## Participants
 

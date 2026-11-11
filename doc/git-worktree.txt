@@ -94,6 +94,9 @@ Only one action runs at a time. Pickers use |vim.ui.select| and
 `scope`         Drops scope.nvim's per-tab buffer lists.
 `bufferline`    Drops bufferline's pins.
 `neotree`       Closes neo-tree and drops its per-tab source state.
+`snacks_explorer`
+              Closes the snacks.nvim explorer and forgets its expanded
+              folders.
 
 ==============================================================================
 5. PARTICIPANTS                               *git-worktree-participants*
